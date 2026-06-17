@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penilaian Perkembangan Kanak-Kanak Pro</title>
+    <style>
+        :root {
+            --primary: #8B5CF6;
+            --primary-light: #EDE9FE;
+            --primary-dark: #6D28D9;
+            --primary-darker: #4C1D95;
+            --secondary: #10B981;
+            --danger: #DC2626;
+            --danger-light: #FEE2E2;
+            --warning: #F59E0B;
+            --warning-light: #FEF3C7;
+            --text-main: #1F2937;
+            --text-muted: #4B5563;
+            --bg-color: #FDF4F5;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: linear-gradient(135deg, #FDF4F5 0%, #E8F4F8 50%, #F3F0FF 100%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* --- UI Elements & Layout --- */
+        header {
+            background: linear-gradient(135deg, #8B5CF6 0%, #60A5FA 100%);
+            color: white;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .top-controls {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            max-width: 1100px;
+            margin: 0 auto 1rem auto;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        select, button {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            outline: none;
+        }
+
+        select { color: var(--text-main); background: white; }
+        
+        button.btn-action {
+            background-color: white;
+            color: var(--primary-dark);
+            transition: all 0.2s;
+        }
+        button.btn-action:hover { background-color: var(--primary-light); }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* --- Age Selector --- */
+        .age-selector {
+            display: flex;
+            overflow-x: auto;
+            gap: 0.75rem;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+            scrollbar-width: thin;
+        }
+        .age-selector::-webkit-scrollbar { height: 6px; }
+        .age-selector::-webkit-scrollbar-thumb { background-color: var(--primary-light); border-radius: 10px; }
+
+        .age-btn {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 2px solid var(--primary-light);
+            color: var(--primary-dark);
+            padding: 0.75rem 1.5rem;
+            border-radius: 999px;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+        .age-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 6px rgba(139, 92, 246, 0.3);
+        }
+
+        /* --- Main Content Grid --- */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+        @media (max-width: 850px) { .content-grid { grid-template-columns: 1fr; } }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-dark);
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .progress-indicator {
+            font-size: 0.9rem;
+            color: var(--secondary);
+            font-weight: bold;
+            background: #D1FAE5;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+        }
+
+        /* --- Milestones Categories --- */
+        .milestone-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        @media (max-width: 640px) { .milestone-grid { grid-template-columns: 1fr; } }
+
+        .category {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            overflow: hidden; 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04);
+        }
+
+        .category-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            background: linear-gradient(135deg, var(--primary-darker) 0%, var(--text-main) 100%);
+            padding: 0.85rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        .category-content {
+            padding: 1rem 1.2rem;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0.6rem;
+            padding: 0.4rem;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        .checklist-item:hover { background-color: #F3F4F6; }
+
+        .checklist-item input[type="checkbox"] {
+            margin-top: 0.25rem;
+            margin-right: 0.75rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            accent-color: var(--secondary);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .checklist-item label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+        .checklist-item input[type="checkbox"]:checked + label {
+            text-decoration: line-through;
+            color: #9CA3AF;
+        }
+
+        /* --- Intervention Section --- */
+        .intervention-card {
+            background-color: var(--warning-light);
+            border: 1px solid #FCD34D;
+        }
+        .intervention-title {
+            color: #B45309;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .intervention-list {
+            list-style: none;
+        }
+        .intervention-list li {
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            color: #92400E;
+        }
+        .intervention-list li::before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        /* --- Red Flags Section --- */
+        .red-flags-card {
+            background-color: rgba(254, 226, 226, 0.8);
+            border: 1px solid #FECACA;
+        }
+        .red-flags-title {
+            color: var(--danger);
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #FECACA;
+            padding-bottom: 0.5rem;
+        }
+        .red-flags-list { list-style: none; }
+        .red-flags-list li {
+            position: relative;
+            padding-left: 1.75rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            color: #991B1B;
+        }
+        .red-flags-list li::before { content: "⚠️"; position: absolute; left: 0; top: 0; font-size: 0.9rem; }
+
+        /* --- Modals --- */
+        .modal-overlay {
+            display: flex; /* Mula-mula display flex untuk tunjuk loading */
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 2.5rem 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .modal-content label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+        .modal-content input {
+            width: 100%; padding: 0.75rem; margin-bottom: 1.2rem;
+            border: 1px solid #D1D5DB; border-radius: 6px;
+            font-size: 1rem;
+        }
+        .modal-btns { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;}
+        .btn-primary { background: var(--primary); color: white; border: none; width: 100%; padding: 0.8rem;}
+        
+        #loading-overlay { flex-direction: column; color: white; }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Overlay -->
+    <div class="modal-overlay" id="loading-overlay">
+        <h2>Memuatkan Sistem... / Loading...</h2>
+    </div>
+
+    <!-- Profile Auto Pop-Up Modal -->
+    <div class="modal-overlay" id="profile-modal" style="display: none;">
+        <div class="modal-content">
+            <h2 id="t-modal-title" style="margin-bottom: 1.5rem; color: var(--primary-dark); text-align: center;">Daftar Rekod Baru</h2>
+            <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Maklumat ini hanya digunakan untuk tujuan eksport laporan (CSV).</p>
+            
+            <label id="t-label-name">Nama Penuh / Gelaran:</label>
+            <input type="text" id="input-name" placeholder="Contoh: Ahmad" required>
+            
+            <label id="t-label-dob">Tarikh Lahir:</label>
+            <input type="date" id="input-dob" required>
+            
+            <div class="modal-btns">
+                <button class="btn-primary" onclick="saveProfile()" id="t-btn-save-profile">Mula Sekarang</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Denied Modal -->
+    <div class="modal-overlay" id="alert-modal" style="display: none;">
+        <div class="modal-content" style="padding: 2rem;">
+            <h2 style="margin-bottom: 1rem; color: var(--danger);">Akses Ditolak</h2>
+            <p id="alert-msg" style="margin-bottom: 1.5rem;">Hanya pemilik rekod sahaja yang dibenarkan mengeksport fail ini.</p>
+            <div class="modal-btns">
+                <button class="btn-primary" onclick="closeModal('alert-modal')" style="width: auto;">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <div class="top-controls">
+            <!-- Bahagian Kanan Sahaja: Eksport & Bahasa -->
+            <div class="control-group">
+                <button class="btn-action" onclick="exportCSV()" id="t-export-btn">📥 CSV</button>
+                <select id="lang-selector" onchange="changeLanguage(this.value)">
+                    <option value="ms">Bahasa Melayu</option>
+                    <option value="en">English</option>
+                    <option value="zh">中文 (Chinese)</option>
+                    <option value="ta">தமிழ் (Tamil)</option>
+                </select>
+            </div>
+        </div>
+        <h1 id="t-main-title">PENILAIAN PERKEMBANGAN NORMAL KANAK-KANAK</h1>
+        <p id="t-main-desc">Berdasarkan panduan rasmi Buku Rekod Kesihatan Bayi & Kanak-Kanak 0-6 tahun Pindaan 03/2021 Kementerian Kesihatan Malaysia.</p>
+    </header>
+
+    <div class="container">
+        <!-- Age Selector -->
+        <div class="age-selector" id="age-buttons"></div>
+
+        <!-- Main Content Grid -->
+        <div class="content-grid" id="content-display">
+            <!-- Content Injected via JS -->
+        </div>
+    </div>
+
+    <!-- Script Logic (No External Modules) -->
+    <script>
+        let currentProfile = null;
+        let activeAgeId = "1.5"; 
+        let progressData = {}; 
+        let currentLang = 'ms';
+        // Hasilkan ID rawak untuk peranti ini sebagai "Owner ID"
+        let localOwnerId = localStorage.getItem('deviceOwnerId');
+        if (!localOwnerId) {
+            localOwnerId = 'owner_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('deviceOwnerId', localOwnerId);
+        }
+
+        // --- Translations (i18n) & Data ---
+        const i18n = {
+            ms: {
+                mainTitle: "PENILAIAN PERKEMBANGAN NORMAL KANAK-KANAK",
+                mainDesc: "Berdasarkan panduan rasmi Buku Rekod Kesihatan Bayi & Kanak-Kanak 0-6 tahun Pindaan 03/2021 Kementerian Kesihatan Malaysia.",
+                exportBtn: "📥 Eksport CSV",
+                modalTitle: "Daftar Rekod Baru",
+                labelName: "Nama Penuh / Gelaran:",
+                labelDOB: "Tarikh Lahir:",
+                btnStart: "Mula Sekarang",
+                alertEmptyInput: "Sila lengkapkan nama dan tarikh lahir.",
+                checklistLabel: "Senarai Semak Umur",
+                achieved: "Dicapai",
+                redFlagsTitle: "Tanda Amaran (Red Flags)",
+                doctorAdviceTitle: "Bila Perlu Berjumpa Doktor?",
+                doctorAdviceDesc: "Jika anda mendapati anak mempunyai Tanda Amaran di atas, sila maklumkan kepada Jururawat di Klinik Kesihatan atau berjumpa Doktor.",
+                interventionTitle: "Cadangan Aktiviti Intervensi (Stimulasi)",
+                notOwnerAlert: "Akses Ditolak: Hanya pemilik (owner) rekod ini yang dibenarkan mengeksport data.",
+                categories: {
+                    "Motor Kasar": "Motor Kasar", "Penglihatan": "Penglihatan", "Pendengaran / Kognitif": "Pendengaran / Kognitif", 
+                    "Pertuturan": "Pertuturan", "Adaptif (Motor Halus)": "Adaptif (Motor Halus)", "Kelakuan (Personal Sosial)": "Kelakuan (Personal Sosial)"
+                }
+            },
+            en: {
+                mainTitle: "NORMAL CHILD DEVELOPMENT ASSESSMENT",
+                mainDesc: "Based on the official Ministry of Health Malaysia (KKM) Child Health Record Book.",
+                exportBtn: "📥 Export CSV",
+                modalTitle: "New Record Registration",
+                labelName: "Full Name / Nickname:",
+                labelDOB: "Date of Birth:",
+                btnStart: "Start Now",
+                alertEmptyInput: "Please complete the name and date of birth.",
+                checklistLabel: "Checklist for Age",
+                achieved: "Achieved",
+                redFlagsTitle: "Warning Signs (Red Flags)",
+                doctorAdviceTitle: "When to see a Doctor?",
+                doctorAdviceDesc: "If you notice any of the Red Flags above, please inform the Nurse at the Health Clinic or see a Doctor immediately.",
+                interventionTitle: "Suggested Intervention Activities (Stimulation)",
+                notOwnerAlert: "Access Denied: Only the record owner can export the data.",
+                categories: {
+                    "Motor Kasar": "Gross Motor", "Penglihatan": "Vision", "Pendengaran / Kognitif": "Hearing / Cognitive", 
+                    "Pertuturan": "Speech", "Adaptif (Motor Halus)": "Fine Motor", "Kelakuan (Personal Sosial)": "Personal Social"
+                }
+            },
+            zh: {
+                mainTitle: "正常儿童发育评估",
+                mainDesc: "基于马来西亚卫生部（KKM）官方儿童健康记录本。",
+                exportBtn: "📥 导出 CSV",
+                modalTitle: "新记录注册",
+                labelName: "全名 / 昵称：",
+                labelDOB: "出生日期：",
+                btnStart: "现在开始",
+                alertEmptyInput: "请填写姓名和出生日期。",
+                checklistLabel: "年龄检查表",
+                achieved: "已达成",
+                redFlagsTitle: "危险信号 (Red Flags)",
+                doctorAdviceTitle: "什么时候看医生？",
+                doctorAdviceDesc: "如果您发现上述任何危险信号，请通知健康诊所的护士或立即看医生。",
+                interventionTitle: "建议的干预活动（刺激）",
+                notOwnerAlert: "拒绝访问：只有记录所有者才能导出数据。",
+                categories: {
+                    "Motor Kasar": "粗大动作", "Penglihatan": "视觉", "Pendengaran / Kognitif": "听觉 / 认知", 
+                    "Pertuturan": "语言", "Adaptif (Motor Halus)": "精细动作", "Kelakuan (Personal Sosial)": "个人社交"
+                }
+            },
+            ta: {
+                mainTitle: "சாதாரண குழந்தை வளர்ச்சி மதிப்பீடு",
+                mainDesc: "மலேசிய சுகாதார அமைச்சகத்தின் (KKM) அதிகாரப்பூர்வ குழந்தை சுகாதார பதிவு புத்தகத்தின் அடிப்படையில்.",
+                exportBtn: "📥 CSV ஏற்றுமதி",
+                modalTitle: "புதிய பதிவு",
+                labelName: "முழு பெயர் / செல்லப்பெயர்:",
+                labelDOB: "பிறந்த தேதி:",
+                btnStart: "இப்போது தொடங்குங்கள்",
+                alertEmptyInput: "பெயர் மற்றும் பிறந்த தேதியை நிரப்பவும்.",
+                checklistLabel: "வயதுக்கான சரிபார்ப்புப் பட்டியல்",
+                achieved: "அடையப்பட்டது",
+                redFlagsTitle: "எச்சரிக்கை அறிகுறிகள்",
+                doctorAdviceTitle: "எப்போது மருத்துவரைப் பார்க்க வேண்டும்?",
+                doctorAdviceDesc: "மேற்கண்ட எச்சரிக்கை அறிகுறிகளை நீங்கள் கவனித்தால், தயவுசெய்து சுகாதார கிளினிக்கில் உள்ள செவிலியரிடம் தெரிவிக்கவும் அல்லது மருத்துவரைப் பார்க்கவும்.",
+                interventionTitle: "பரிந்துரைக்கப்பட்ட தலையீட்டு நடவடிக்கைகள்",
+                notOwnerAlert: "அணுகல் மறுக்கப்பட்டது: பதிவு உரிமையாளர் மட்டுமே தரவை ஏற்றுமதி செய்ய முடியும்.",
+                categories: {
+                    "Motor Kasar": "மொத்த மோட்டார்", "Penglihatan": "பார்வை", "Pendengaran / Kognitif": "கேட்டல் / அறிவாற்றல்", 
+                    "Pertuturan": "பேச்சு", "Adaptif (Motor Halus)": "சிறிய மோட்டார்", "Kelakuan (Personal Sosial)": "தனிப்பட்ட சமூகம்"
+                }
+            }
+        };
+
+        const interventions = {
+            "Motor Kasar": { ms: "Bawa anak ke taman permainan, galakkan berlari, melompat, memanjat, dan menendang bola.", en: "Take child to playground, encourage running, jumping, climbing, and kicking balls.", zh: "带孩子去游乐场，鼓励跑、跳、爬、踢球。", ta: "குழந்தையை விளையாட்டு மைதானத்திற்கு அழைத்துச் செல்லுங்கள், ஓட, குதிக்க ஊக்குவிக்கவும்." },
+            "Penglihatan": { ms: "Main 'ciluk-ba', tunjuk objek berwarna terang, rujuk pakar jika mata juling/tidak fokus.", en: "Play peek-a-boo, show brightly colored objects, consult specialist if eyes cross.", zh: "玩捉迷藏，展示鲜艳颜色的物体。", ta: "கண்ணாமூச்சி விளையாடுங்கள், பிரகாசமான பொருட்களைக் காட்டுங்கள்." },
+            "Pendengaran / Kognitif": { ms: "Beri arahan mudah secara rutin, main teka-teki, sorok barang dan minta cari.", en: "Give simple instructions routinely, play puzzles, hide items and ask to find.", zh: "经常给出简单的指示，玩拼图，藏东西让孩子找。", ta: "எளிய வழிமுறைகளை தொடர்ந்து கொடுங்கள், புதிர்களை விளையாடுங்கள்." },
+            "Pertuturan": { ms: "Kerap bersembang dengan anak, baca buku cerita bersama, elakkan gajet berlebihan (screen time).", en: "Talk to child frequently, read storybooks together, avoid excessive screen time.", zh: "经常和孩子聊天，一起读故事书，避免过度使用电子产品。", ta: "குழந்தையுடன் அடிக்கடி பேசுங்கள், கதை புத்தகங்களை ஒன்றாகப் படியுங்கள்." },
+            "Adaptif (Motor Halus)": { ms: "Beri blok binaan (Lego), playdough (plastisin), koyak kertas, menconteng, belajar butang baju.", en: "Give building blocks, playdough, tear paper, scribble, learn to button clothes.", zh: "提供积木，橡皮泥，撕纸，涂鸦，学习扣扣子。", ta: "கட்டிட தொகுதிகள், களிமண், காகிதத்தை கிழித்தல் ஆகியவற்றை கொடுங்கள்." },
+            "Kelakuan (Personal Sosial)": { ms: "Atur 'playdate' dengan kanak-kanak lain, ajar berkongsi, ajar urus diri (pakai baju/makan sendiri).", en: "Arrange playdates, teach sharing, teach self-care (dressing/eating independently).", zh: "安排与其他孩子玩耍，教导分享，教导自理能力（自己穿衣/吃饭）。", ta: "விளையாட்டு தேதிகளை ஏற்பாடு செய்யுங்கள், பகிர கற்பிக்கவும்." }
+        };
+
+        const ageOrder = ["1.5", "2", "3", "4", "5", "6"];
+
+        const devData = {
+            "1.5": { 
+                label: {ms:"18 Bulan", en:"18 Months", zh:"18 个月", ta:"18 மாதங்கள்"}, 
+                milestones: [
+                    { cat: "Motor Kasar", icon: "🏃", items: [{ms:"Berjalan sendiri", en:"Walks independently", zh:"独立行走", ta:"தனியாக நடக்கிறது"}, {ms:"Membongkok untuk mengambil barang di lantai", en:"Bends down to pick up items", zh:"弯腰捡东西", ta:"பொருட்களை எடுக்க குனிவது"}] },
+                    { cat: "Penglihatan", icon: "👁️", items: [{ms:"Melihat seperti seorang dewasa", en:"Vision like an adult", zh:"像成人一样的视力", ta:"பெரியவர்களைப் போன்ற பார்வை"}] },
+                    { cat: "Pendengaran / Kognitif", icon: "👂", items: [{ms:"Faham perkataan senang", en:"Understands simple words", zh:"懂简单的词", ta:"எளிய வார்த்தைகளைப் புரிந்து கொள்ளுதல்"}, {ms:"Mengangguk/menggeleng untuk ya/tidak", en:"Nods/shakes head for yes/no", zh:"点头/摇头表示是/否", ta:"ஆம்/இல்லை என்பதற்கு தலையை அசைத்தல்"}] },
+                    { cat: "Pertuturan", icon: "🗣️", items: [{ms:"Sebut 3 perkataan bermakna", en:"Says 3 meaningful words", zh:"说3个有意义的词", ta:"3 அர்த்தமுள்ள வார்த்தைகளைச் சொல்கிறது"}, {ms:"Mengulang perkataan yang didengar dalam perbualan", en:"Repeats words heard in conversation", zh:"重复对话中听到的单词", ta:"உரையாடலில் கேட்ட வார்த்தைகளை மீண்டும் கூறுகிறது"}] },
+                    { cat: "Adaptif (Motor Halus)", icon: "✍️", items: [{ms:"Boleh menconteng", en:"Can scribble", zh:"会涂鸦", ta:"கிறுக்குகிறது"}, {ms:"Bina menara 3 kiub", en:"Builds tower of 3 cubes", zh:"搭3块积木的塔", ta:"3 கனசதுர கோபுரத்தை உருவாக்குகிறது"}] },
+                    { cat: "Kelakuan (Personal Sosial)", icon: "🤝", items: [{ms:"Boleh menerima arahan yang mudah", en:"Accepts simple instructions", zh:"接受简单的指示", ta:"எளிய வழிமுறைகளை ஏற்றுக்கொள்கிறது"}, {ms:"Meniru kerja-kerja rumah seperti lap meja/ sapu sampah", en:"Copies housework like wiping/sweeping", zh:"模仿做家务（擦桌子/扫地）", ta:"வீட்டு வேலைகளைப் பின்பற்றுகிறது"}] }
+                ],
+                redFlags: [
+                    {ms: "Tidak boleh berjalan sendiri atau membongkok mengambil barang.", en: "Cannot walk independently or bend to pick up items."},
+                    {ms: "Tidak menyebut sekurang-kurangnya 3 perkataan bermakna.", en: "Does not say at least 3 meaningful words."},
+                    {ms: "Tidak mengangguk atau menggeleng kepala untuk 'ya' atau 'tidak'.", en: "Does not nod or shake head for 'yes' or 'no'."},
+                    {ms: "Tidak boleh menconteng atau menyusun menara 3 kiub.", en: "Cannot scribble or build a 3-cube tower."},
+                    {ms: "Tidak faham arahan mudah atau tidak menunjukkan minat meniru kerja rumah.", en: "Does not understand simple instructions or copy housework."}
+                ]
+            },
+            "2": { 
+                label: {ms:"2 Tahun", en:"2 Years", zh:"2 岁", ta:"2 ஆண்டுகள்"}, 
+                milestones: [
+                    { cat: "Motor Kasar", icon: "🏃", items: [{ms:"Pandai berjalan & Berlari", en:"Walks well & Runs", zh:"走得好和跑", ta:"நன்றாக நடக்கிறது & ஓடுகிறது"}, {ms:"Memanjat tangga dua kaki pada satu tangga", en:"Climbs stairs two feet per step", zh:"双脚踩一阶上楼梯", ta:"படிக்கட்டுகளில் ஏறுகிறது"}] },
+                    { cat: "Penglihatan", icon: "👁️", items: [{ms:"Melihat seperti seorang dewasa", en:"Vision like an adult", zh:"像成人一样的视力", ta:"பெரியவர்களைப் போன்ற பார்வை"}] },
+                    { cat: "Pendengaran / Kognitif", icon: "👂", items: [{ms:"Faham dua peringkat arahan", en:"Understands 2-step instructions", zh:"懂两步指示", ta:"2-படி வழிமுறைகளைப் புரிந்து கொள்ளுதல்"}] },
+                    { cat: "Pertuturan", icon: "🗣️", items: [{ms:"Menggunakan ayat ringkas (2-3 perkataan)", en:"Uses simple sentences (2-3 words)", zh:"使用简单句子（2-3个词）", ta:"எளிய வாக்கியங்களைப் பயன்படுத்துகிறது"}] },
+                    { cat: "Adaptif (Motor Halus)", icon: "✍️", items: [{ms:"Bina menara 6 kiub", en:"Builds tower of 6 cubes", zh:"搭6块积木的塔", ta:"6 கனசதுர கோபுரத்தை உருவாக்குகிறது"}, {ms:"Buka muka surat satu per satu", en:"Turns pages one by one", zh:"一页一页翻书", ta:"ஒவ்வொரு பக்கமாக திருப்புகிறது"}, {ms:"Menunjuk kepada gambar", en:"Points to pictures", zh:"指图片", ta:"படங்களைச் சுட்டிக்காட்டுகிறது"}, {ms:"Meniru garis vertikal", en:"Copies a vertical line", zh:"模仿画竖线", ta:"செங்குத்து கோட்டை வரைகிறது"}] },
+                    { cat: "Kelakuan (Personal Sosial)", icon: "🤝", items: [{ms:"Initiate toilet need", en:"Indicates toilet need", zh:"示意如厕需求", ta:"கழிப்பறை தேவையை குறிக்கிறது"}] }
+                ],
+                redFlags: [
+                    {ms: "Tidak boleh berlari atau sukar memanjat tangga.", en: "Cannot run or has difficulty climbing stairs."},
+                    {ms: "Tidak menggunakan ayat ringkas (gabungan 2-3 perkataan).", en: "Does not use simple sentences (2-3 words)."},
+                    {ms: "Tidak memahami arahan 2 peringkat.", en: "Does not understand 2-step instructions."},
+                    {ms: "Tidak menunjuk kepada gambar atau tidak tahu menyelak muka surat.", en: "Does not point to pictures or turn book pages."},
+                    {ms: "Tidak boleh menyusun 6 kiub atau meniru garisan vertikal.", en: "Cannot build a 6-cube tower or copy a vertical line."}
+                ]
+            },
+            "3": { 
+                label: {ms:"3 Tahun", en:"3 Years", zh:"3 岁", ta:"3 ஆண்டுகள்"}, 
+                milestones: [
+                    { cat: "Motor Kasar", icon: "🏃", items: [{ms:"Melompat & Memanjat", en:"Jumps & Climbs", zh:"跳和爬", ta:"குதிக்கிறது & ஏறுகிறது"}] },
+                    { cat: "Penglihatan", icon: "👁️", items: [{ms:"Melihat seperti seorang dewasa", en:"Vision like an adult", zh:"像成人一样的视力", ta:"பெரியவர்களைப் போன்ற பார்வை"}] },
+                    { cat: "Pendengaran / Kognitif", icon: "👂", items: [{ms:"Menjawab soalan senang", en:"Answers simple questions", zh:"回答简单问题", ta:"எளிய கேள்விகளுக்கு பதிலளிக்கிறது"}] },
+                    { cat: "Pertuturan", icon: "🗣️", items: [{ms:"Menggunakan ayat ringkas", en:"Uses simple sentences", zh:"使用简单句子", ta:"எளிய வாக்கியங்களைப் பயன்படுத்துகிறது"}] },
+                    { cat: "Adaptif (Motor Halus)", icon: "✍️", items: [{ms:"Bina menara 10 kiub", en:"Builds tower of 10 cubes", zh:"搭10块积木的塔", ta:"10 கனசதுர கோபுரத்தை உருவாக்குகிறது"}, {ms:"Meniru bentuk bulat", en:"Copies a circle", zh:"画圆圈", ta:"வட்டத்தை வரைகிறது"}] },
+                    { cat: "Kelakuan (Personal Sosial)", icon: "🤝", items: [{ms:"Pandai mengatur BO/PU", en:"Toilet trained (bowel/urine)", zh:"能够控制大小便", ta:"கழிப்பறை பயிற்சி பெற்றது"}] }
+                ],
+                redFlags: [
+                    {ms: "Tidak boleh melompat atau tidak cekap berlari.", en: "Cannot jump or is clumsy when running."},
+                    {ms: "Tidak faham ayat ringkas atau gagal menjawab soalan senang.", en: "Does not understand simple sentences or fails to answer basic questions."},
+                    {ms: "Masih belum pandai mengawal pembuangan air (BO/PU).", en: "Not yet toilet trained for bowel/urine."},
+                    {ms: "Tidak boleh memadankan warna atau meniru bentuk bulatan.", en: "Cannot match colors or copy a circle."},
+                    {ms: "Tidak mahu bergaul langsung dengan kanak-kanak lain.", en: "Refuses to socialize with other children."}
+                ]
+            },
+            "4": { 
+                label: {ms:"4 Tahun", en:"4 Years", zh:"4 岁", ta:"4 ஆண்டுகள்"}, 
+                milestones: [
+                    { cat: "Motor Kasar", icon: "🏃", items: [{ms:"Lompat sebelah kaki", en:"Hops on one foot", zh:"单脚跳", ta:"ஒரு காலில் குதிக்கிறது"}] },
+                    { cat: "Penglihatan", icon: "👁️", items: [{ms:"Melihat huruf jarak 6 meter", en:"Reads letters at 6m", zh:"看清6米外的字母", ta:"6மீ தூரத்தில் எழுத்துக்களைப் படிக்கிறது"}] },
+                    { cat: "Pendengaran / Kognitif", icon: "👂", items: [{ms:"Ikut arahan 3 peringkat", en:"Follows 3-step commands", zh:"听从3步指示", ta:"3-படி வழிமுறைகளைப் பின்பற்றுகிறது"}] },
+                    { cat: "Pertuturan", icon: "🗣️", items: [{ms:"Percakapan 100% difahami orang luar", en:"Speech 100% understood by strangers", zh:"外人能100%听懂", ta:"பேச்சு 100% மற்றவர்களுக்கு புரிகிறது"}] },
+                    { cat: "Adaptif (Motor Halus)", icon: "✍️", items: [{ms:"Meniru tanda X", en:"Copies X mark", zh:"模仿画X", ta:"X குறியீட்டை வரைகிறது"}] },
+                    { cat: "Kelakuan (Personal Sosial)", icon: "🤝", items: [{ms:"Kongsi mainan", en:"Shares toys", zh:"分享玩具", ta:"பொம்மைகளை பகிர்கிறது"}] }
+                ],
+                redFlags: [
+                    {ms: "Tidak boleh melompat dengan sebelah kaki.", en: "Cannot hop on one foot."},
+                    {ms: "Percakapan masih belum difahami sepenuhnya oleh orang luar.", en: "Speech is still not fully understood by strangers."},
+                    {ms: "Sukar meniru tanda 'X' atau memadankan bentuk asas.", en: "Difficulty copying an 'X' or matching basic shapes."},
+                    {ms: "Tidak pandai membasuh tangan dan muka sendiri.", en: "Cannot wash face and hands independently."},
+                    {ms: "Tidak mahu berkongsi mainan atau bermain bersama.", en: "Refuses to share toys or play cooperatively."}
+                ]
+            },
+            "5": { 
+                label: {ms:"5 Tahun", en:"5 Years", zh:"5 岁", ta:"5 ஆண்டுகள்"}, 
+                milestones: [
+                    { cat: "Motor Kasar", icon: "🏃", items: [{ms:"Berdiri sebelah kaki 10 saat", en:"Stands on one foot 10 secs", zh:"单脚站立10秒", ta:"ஒரு காலில் 10 வினாடிகள் நிற்கிறது"}] },
+                    { cat: "Penglihatan", icon: "👁️", items: [{ms:"Melihat huruf jarak 6 meter", en:"Reads letters at 6m", zh:"看清6米外的字母", ta:"6மீ தூரத்தில் எழுத்துக்களைப் படிக்கிறது"}] },
+                    { cat: "Pendengaran / Kognitif", icon: "👂", items: [{ms:"Tahu kanan dan kiri", en:"Knows right and left", zh:"分清左右", ta:"வலது மற்றும் இடது தெரியும்"}] },
+                    { cat: "Pertuturan", icon: "🗣️", items: [{ms:"Mengira sampai 10", en:"Counts to 10", zh:"数到10", ta:"10 வரை எண்ணுகிறது"}] },
+                    { cat: "Adaptif (Motor Halus)", icon: "✍️", items: [{ms:"Tiru rajah segi 4", en:"Copies a square", zh:"画正方形", ta:"சதுரத்தை வரைகிறது"}] },
+                    { cat: "Kelakuan (Personal Sosial)", icon: "🤝", items: [{ms:"Pakai & tanggal baju", en:"Dresses & undresses self", zh:"自己穿脱衣服", ta:"தானாகவே உடை அணிகிறது"}] }
+                ],
+                redFlags: [
+                    {ms: "Tidak boleh berdiri sebelah kaki selama 10 saat.", en: "Cannot stand on one foot for 10 seconds."},
+                    {ms: "Masih keliru arah kanan dan kiri.", en: "Still confused between right and left."},
+                    {ms: "Tidak boleh mengira sampai 10.", en: "Cannot count up to 10."},
+                    {ms: "Tidak pandai meniru rajah segi empat.", en: "Cannot copy a square shape."},
+                    {ms: "Belum boleh memakai dan menanggalkan baju sendiri.", en: "Cannot dress and undress independently."}
+                ]
+            },
+            "6": { 
+                label: {ms:"6 Tahun", en:"6 Years", zh:"6 岁", ta:"6 ஆண்டுகள்"}, 
+                milestones: [
+                    { cat: "Motor Kasar", icon: "🏃", items: [{ms:"Mengayuh basikal roda dua", en:"Rides a 2-wheel bicycle", zh:"骑两轮自行车", ta:"2-சக்கர சைக்கிள் ஓட்டுகிறது"}] },
+                    { cat: "Penglihatan", icon: "👁️", items: [{ms:"Melihat huruf jarak 6 meter", en:"Reads letters at 6m", zh:"看清6米外的字母", ta:"6மீ தூரத்தில் எழுத்துக்களைப் படிக்கிறது"}] },
+                    { cat: "Pendengaran / Kognitif", icon: "👂", items: [{ms:"Banyak bertanya", en:"Asks many questions", zh:"经常问问题", ta:"பல கேள்விகளைக் கேட்கிறது"}] },
+                    { cat: "Pertuturan", icon: "🗣️", items: [{ms:"Bercakap dengan bijak", en:"Speaks fluently/smartly", zh:"流利地说话", ta:"புத்திசாலித்தனமாக பேசுகிறது"}] },
+                    { cat: "Adaptif (Motor Halus)", icon: "✍️", items: [{ms:"Lukis orang 12 sifat", en:"Draws person 12 parts", zh:"画有12个部位的人", ta:"12 உறுப்புகளுடன் நபரை வரைகிறது"}] },
+                    { cat: "Kelakuan (Personal Sosial)", icon: "🤝", items: [{ms:"Ikut giliran bermain", en:"Takes turns playing", zh:"轮流玩耍", ta:"முறைப்படி விளையாடுகிறது"}] }
+                ],
+                redFlags: [
+                    {ms: "Percakapan belum petah atau sukar difahami.", en: "Speech is not fluent or is hard to understand."},
+                    {ms: "Tidak boleh menyalin bentuk empat segi berpalang di dalamnya.", en: "Cannot copy a square with a cross inside."},
+                    {ms: "Tidak mahu berkawan atau sukar mengikut peraturan giliran.", en: "Refuses to make friends or struggles with taking turns."},
+                    {ms: "Tidak berminat dengan permainan imaginasi (main peranan).", en: "Lacks interest in imaginative or role-play games."}
+                ]
+            }
+        };
+
+        window.changeLanguage = function(lang) {
+            currentLang = lang;
+            updateUItext();
+            initUI(); 
+        }
+
+        function updateUItext() {
+            const t = i18n[currentLang];
+            document.getElementById('t-main-title').innerText = t.mainTitle;
+            document.getElementById('t-main-desc').innerText = t.mainDesc;
+            document.getElementById('t-export-btn').innerText = t.exportBtn;
+            document.getElementById('t-modal-title').innerText = t.modalTitle;
+            document.getElementById('t-label-name').innerText = t.labelName;
+            document.getElementById('t-label-dob').innerText = t.labelDOB;
+            document.getElementById('t-btn-save-profile').innerText = t.btnStart;
+        }
+
+        window.openModal = id => document.getElementById(id).style.display = 'flex';
+        window.closeModal = id => document.getElementById(id).style.display = 'none';
+
+        function loadLocalData() {
+            try {
+                currentProfile = JSON.parse(localStorage.getItem('childProfile')) || null;
+                progressData = JSON.parse(localStorage.getItem('localProgress')) || {};
+            } catch (e) {
+                console.warn("Storage access restricted. Profile info won't be saved permanently.");
+                currentProfile = null;
+            }
+
+            document.getElementById('loading-overlay').style.display = 'none';
+            if (!currentProfile || !currentProfile.name) {
+                openModal('profile-modal');
+            }
+        }
+
+        function initUI() {
+            updateUItext();
+            const btnContainer = document.getElementById('age-buttons');
+            btnContainer.innerHTML = ''; 
+            
+            ageOrder.forEach(ageKey => {
+                const btn = document.createElement('button');
+                btn.className = 'age-btn';
+                btn.id = `btn-${ageKey}`;
+                btn.innerText = devData[ageKey].label[currentLang] || devData[ageKey].label.ms;
+                btn.onclick = () => { activeAgeId = ageKey; renderContent(ageKey); };
+                btnContainer.appendChild(btn);
+            });
+            renderContent(activeAgeId);
+        }
+
+        function renderContent(ageId) {
+            document.querySelectorAll('.age-btn').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.getElementById(`btn-${ageId}`);
+            if(activeBtn) activeBtn.classList.add('active');
+
+            const data = devData[ageId];
+            const contentDisplay = document.getElementById('content-display');
+            const t = i18n[currentLang];
+            
+            let totalItems = 0;
+            let checkedItems = 0;
+            let globalIndex = 0;
+            
+            let html = `
+                <div class="card fade-in">
+                    <div class="card-title">
+                        <span>${t.checklistLabel}: ${data.label[currentLang] || data.label.ms}</span>
+                        <span class="progress-indicator" id="progress-text"></span>
+                    </div>
+                    <div class="milestone-grid">
+            `;
+
+            let weakDomains = [];
+
+            data.milestones.forEach(catBlock => {
+                let catTotal = 0;
+                let catChecked = 0;
+                
+                const translatedCatTitle = t.categories[catBlock.cat] || catBlock.cat;
+                
+                html += `
+                    <div class="category">
+                        <div class="category-title">
+                            <span>${catBlock.icon}</span> ${translatedCatTitle}
+                        </div>
+                        <div class="category-content">
+                `;
+
+                catBlock.items.forEach(item => {
+                    const isChecked = (progressData[ageId] && progressData[ageId][globalIndex]);
+                    const checkedStr = isChecked ? 'checked' : '';
+                    
+                    totalItems++;
+                    catTotal++;
+                    if (isChecked) { checkedItems++; catChecked++; }
+                    
+                    const text = item[currentLang] || item.ms; 
+                    
+                    html += `
+                        <div class="checklist-item">
+                            <input type="checkbox" id="check-${globalIndex}" ${checkedStr} 
+                                onchange="toggleMilestone('${ageId}', ${globalIndex}, this.checked)">
+                            <label for="check-${globalIndex}">${text}</label>
+                        </div>
+                    `;
+                    globalIndex++;
+                });
+                
+                html += `</div></div>`; 
+                
+                if (catChecked < catTotal && currentProfile) { 
+                    weakDomains.push(catBlock.cat);
+                }
+            });
+
+            html += `</div></div>`; 
+
+            // --- INTERVENTION SECTION ---
+            if (currentProfile && currentProfile.name && weakDomains.length > 0) {
+                html += `
+                    <div class="card intervention-card fade-in">
+                        <div class="intervention-title">
+                            ${t.interventionTitle}
+                        </div>
+                        <ul class="intervention-list">
+                `;
+                weakDomains.forEach(domain => {
+                    const translatedCatTitle = t.categories[domain] || domain;
+                    const suggestion = interventions[domain][currentLang] || interventions[domain].ms;
+                    html += `<li><strong>${translatedCatTitle}:</strong> ${suggestion}</li>`;
+                });
+                html += `</ul></div>`;
+            } else if (currentProfile && currentProfile.name && weakDomains.length === 0) {
+                 html += `<div class="card fade-in" style="background-color: #D1FAE5; color: #065F46; border: 1px solid #10B981; font-weight: bold; text-align:center;">🌟 Tahniah! Semua perkembangan dicapai! (All milestones achieved)</div>`;
+            }
+
+            // --- RED FLAGS ---
+            html += `
+                <div class="card red-flags-card fade-in" style="margin-top: 1.5rem;">
+                    <div class="red-flags-title">${t.redFlagsTitle}</div>
+                    <p style="color: #991B1B; margin-bottom: 0.5rem; font-size:0.9rem;">
+                        ${t.doctorAdviceDesc}
+                    </p>
+                    <ul class="red-flags-list">
+            `;
+
+            if (data.redFlags) {
+                data.redFlags.forEach(flag => {
+                    const flagText = flag[currentLang] || flag.ms;
+                    html += `<li>${flagText}</li>`;
+                });
+            }
+
+            const regressText = currentLang === 'ms' ? "Hilang kemahiran yang telah dicapai sebelum ini" : 
+                                currentLang === 'zh' ? "丧失以前掌握的技能" : 
+                                currentLang === 'ta' ? "முன்பு பெற்ற திறன்களை இழத்தல்" : 
+                                "Regress in acquired skills (Loss of previous skills)";
+                                
+            html += `
+                        <li style="font-weight: bold; text-decoration: underline;">${regressText}</li>
+                    </ul>
+                </div>
+            `;
+
+            contentDisplay.innerHTML = html;
+            document.getElementById('progress-text').innerText = `${checkedItems} / ${totalItems} ${t.achieved}`;
+        }
+
+        window.saveProfile = function() {
+            const name = document.getElementById('input-name').value;
+            const dob = document.getElementById('input-dob').value;
+            if (!name || !dob) return alert(i18n[currentLang].alertEmptyInput);
+            
+            currentProfile = { name, dob, ownerId: localOwnerId };
+            
+            try {
+                localStorage.setItem('childProfile', JSON.stringify(currentProfile));
+            } catch (e) {
+                console.warn("Could not save to localStorage.");
+            }
+            
+            closeModal('profile-modal');
+            renderContent(activeAgeId);
+        }
+
+        window.toggleMilestone = function(ageId, milestoneIndex, isChecked) {
+            if (!progressData[ageId]) progressData[ageId] = {};
+            progressData[ageId][milestoneIndex] = isChecked;
+
+            try {
+                localStorage.setItem('localProgress', JSON.stringify(progressData));
+            } catch (e) {}
+            
+            renderContent(ageId); 
+        }
+
+        // --- CSV EXPORT WITH OWNER VALIDATION ---
+        window.exportCSV = function() {
+            if (!currentProfile || !currentProfile.name) return;
+            
+            // PENGESAHAN PEMILIK (OWNER CHECK) MENGGUNAKAN LOCAL STORAGE
+            if (currentProfile.ownerId && currentProfile.ownerId !== localOwnerId) {
+                document.getElementById('alert-msg').innerText = i18n[currentLang].notOwnerAlert;
+                openModal('alert-modal');
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            
+            csvContent += `Nama Anak:,${currentProfile.name}\n`;
+            csvContent += `Tarikh Lahir:,${currentProfile.dob}\n\n`;
+            csvContent += `Umur,Kategori,Perkara,Status\n`;
+
+            for (let i = 0; i < ageOrder.length; i++) {
+                let age = ageOrder[i];
+                let gIndex = 0;
+                devData[age].milestones.forEach(cat => {
+                    cat.items.forEach(item => {
+                        const isDone = (progressData[age] && progressData[age][gIndex]) ? "Dicapai (Yes)" : "Belum (No)";
+                        const textStr = `"${item.ms}"`; 
+                        const labelText = devData[age].label[currentLang] || devData[age].label.ms;
+                        csvContent += `"${labelText}","${cat.cat}",${textStr},${isDone}\n`;
+                        gIndex++;
+                    });
+                });
+            }
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Rekod_Perkembangan_${currentProfile.name}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Start initialization immediately when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLocalData();
+            initUI();
+        });
+        
+    </script>
+</body>
+</html>
