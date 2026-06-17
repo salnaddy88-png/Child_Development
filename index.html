@@ -37,7 +37,6 @@
             line-height: 1.6;
         }
 
-        /* --- UI Elements & Layout --- */
         header {
             background: linear-gradient(135deg, #8B5CF6 0%, #60A5FA 100%);
             color: white;
@@ -84,6 +83,7 @@
             transition: all 0.2s;
         }
         button.btn-action:hover { background-color: var(--primary-light); }
+        button:disabled { opacity: 0.7; cursor: not-allowed; }
 
         .container {
             max-width: 1100px;
@@ -91,7 +91,6 @@
             padding: 2rem 1rem;
         }
 
-        /* --- Age Selector --- */
         .age-selector {
             display: flex;
             overflow-x: auto;
@@ -119,7 +118,6 @@
             box-shadow: 0 4px 6px rgba(139, 92, 246, 0.3);
         }
 
-        /* --- Main Content Grid --- */
         .content-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
@@ -158,7 +156,6 @@
             border-radius: 999px;
         }
 
-        /* --- Milestones Categories --- */
         .milestone-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -222,7 +219,6 @@
             color: #9CA3AF;
         }
 
-        /* --- Intervention Section --- */
         .intervention-card {
             background-color: var(--warning-light);
             border: 1px solid #FCD34D;
@@ -253,7 +249,6 @@
             top: 0;
         }
 
-        /* --- Red Flags Section --- */
         .red-flags-card {
             background-color: rgba(254, 226, 226, 0.8);
             border: 1px solid #FECACA;
@@ -276,9 +271,8 @@
         }
         .red-flags-list li::before { content: "⚠️"; position: absolute; left: 0; top: 0; font-size: 0.9rem; }
 
-        /* --- Modals --- */
         .modal-overlay {
-            display: flex; /* Mula-mula display flex untuk tunjuk loading */
+            display: flex;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5);
@@ -323,7 +317,7 @@
     <div class="modal-overlay" id="profile-modal" style="display: none;">
         <div class="modal-content">
             <h2 id="t-modal-title" style="margin-bottom: 1.5rem; color: var(--primary-dark); text-align: center;">Daftar Rekod Baru</h2>
-            <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Maklumat ini hanya digunakan untuk tujuan eksport laporan (CSV).</p>
+            <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Maklumat ini hanya digunakan untuk tujuan eksport laporan.</p>
             
             <label id="t-label-name">Nama Penuh / Gelaran:</label>
             <input type="text" id="input-name" placeholder="Contoh: Ahmad" required>
@@ -340,8 +334,8 @@
     <!-- Export Denied Modal -->
     <div class="modal-overlay" id="alert-modal" style="display: none;">
         <div class="modal-content" style="padding: 2rem;">
-            <h2 style="margin-bottom: 1rem; color: var(--danger);">Akses Ditolak</h2>
-            <p id="alert-msg" style="margin-bottom: 1.5rem;">Hanya pemilik rekod sahaja yang dibenarkan mengeksport fail ini.</p>
+            <h2 style="margin-bottom: 1rem; color: var(--danger);">Perhatian</h2>
+            <p id="alert-msg" style="margin-bottom: 1.5rem;">Mesej ralat di sini.</p>
             <div class="modal-btns">
                 <button class="btn-primary" onclick="closeModal('alert-modal')" style="width: auto;">Tutup</button>
             </div>
@@ -352,7 +346,7 @@
         <div class="top-controls">
             <!-- Bahagian Kanan Sahaja: Eksport & Bahasa -->
             <div class="control-group">
-                <button class="btn-action" onclick="exportCSV()" id="t-export-btn">📥 CSV</button>
+                <button class="btn-action" onclick="exportCSV()" id="t-export-btn">📤 Hantar Rekod</button>
                 <select id="lang-selector" onchange="changeLanguage(this.value)">
                     <option value="ms">Bahasa Melayu</option>
                     <option value="en">English</option>
@@ -375,13 +369,17 @@
         </div>
     </div>
 
-    <!-- Script Logic (No External Modules) -->
     <script>
+        // ==========================================
+        // URL GOOGLE APPS SCRIPT
+        // ==========================================
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzhgQ9c9zf2wRzUUhy7NTcouvK0lwbggyVuuBQw3h7JiIcUg2ip52MuZ4CgqIc7VWIZpg/exec"; 
+
         let currentProfile = null;
         let activeAgeId = "1.5"; 
         let progressData = {}; 
         let currentLang = 'ms';
-        // Hasilkan ID rawak untuk peranti ini sebagai "Owner ID"
+        
         let localOwnerId = localStorage.getItem('deviceOwnerId');
         if (!localOwnerId) {
             localOwnerId = 'owner_' + Math.random().toString(36).substr(2, 9);
@@ -393,7 +391,7 @@
             ms: {
                 mainTitle: "PENILAIAN PERKEMBANGAN NORMAL KANAK-KANAK",
                 mainDesc: "Berdasarkan panduan rasmi Buku Rekod Kesihatan Bayi & Kanak-Kanak 0-6 tahun Pindaan 03/2021 Kementerian Kesihatan Malaysia.",
-                exportBtn: "📥 Eksport CSV",
+                exportBtn: "📤 Hantar Rekod",
                 modalTitle: "Daftar Rekod Baru",
                 labelName: "Nama Penuh / Gelaran:",
                 labelDOB: "Tarikh Lahir:",
@@ -405,7 +403,7 @@
                 doctorAdviceTitle: "Bila Perlu Berjumpa Doktor?",
                 doctorAdviceDesc: "Jika anda mendapati anak mempunyai Tanda Amaran di atas, sila maklumkan kepada Jururawat di Klinik Kesihatan atau berjumpa Doktor.",
                 interventionTitle: "Cadangan Aktiviti Intervensi (Stimulasi)",
-                notOwnerAlert: "Akses Ditolak: Hanya pemilik (owner) rekod ini yang dibenarkan mengeksport data.",
+                notOwnerAlert: "Akses Ditolak: Hanya pemilik (owner) rekod ini yang dibenarkan menghantar data.",
                 categories: {
                     "Motor Kasar": "Motor Kasar", "Penglihatan": "Penglihatan", "Pendengaran / Kognitif": "Pendengaran / Kognitif", 
                     "Pertuturan": "Pertuturan", "Adaptif (Motor Halus)": "Adaptif (Motor Halus)", "Kelakuan (Personal Sosial)": "Kelakuan (Personal Sosial)"
@@ -414,7 +412,7 @@
             en: {
                 mainTitle: "NORMAL CHILD DEVELOPMENT ASSESSMENT",
                 mainDesc: "Based on the official Ministry of Health Malaysia (KKM) Child Health Record Book.",
-                exportBtn: "📥 Export CSV",
+                exportBtn: "📤 Submit Record",
                 modalTitle: "New Record Registration",
                 labelName: "Full Name / Nickname:",
                 labelDOB: "Date of Birth:",
@@ -426,7 +424,7 @@
                 doctorAdviceTitle: "When to see a Doctor?",
                 doctorAdviceDesc: "If you notice any of the Red Flags above, please inform the Nurse at the Health Clinic or see a Doctor immediately.",
                 interventionTitle: "Suggested Intervention Activities (Stimulation)",
-                notOwnerAlert: "Access Denied: Only the record owner can export the data.",
+                notOwnerAlert: "Access Denied: Only the record owner can submit the data.",
                 categories: {
                     "Motor Kasar": "Gross Motor", "Penglihatan": "Vision", "Pendengaran / Kognitif": "Hearing / Cognitive", 
                     "Pertuturan": "Speech", "Adaptif (Motor Halus)": "Fine Motor", "Kelakuan (Personal Sosial)": "Personal Social"
@@ -435,7 +433,7 @@
             zh: {
                 mainTitle: "正常儿童发育评估",
                 mainDesc: "基于马来西亚卫生部（KKM）官方儿童健康记录本。",
-                exportBtn: "📥 导出 CSV",
+                exportBtn: "📤 提交记录",
                 modalTitle: "新记录注册",
                 labelName: "全名 / 昵称：",
                 labelDOB: "出生日期：",
@@ -447,7 +445,7 @@
                 doctorAdviceTitle: "什么时候看医生？",
                 doctorAdviceDesc: "如果您发现上述任何危险信号，请通知健康诊所的护士或立即看医生。",
                 interventionTitle: "建议的干预活动（刺激）",
-                notOwnerAlert: "拒绝访问：只有记录所有者才能导出数据。",
+                notOwnerAlert: "拒绝访问：只有记录所有者才能提交数据。",
                 categories: {
                     "Motor Kasar": "粗大动作", "Penglihatan": "视觉", "Pendengaran / Kognitif": "听觉 / 认知", 
                     "Pertuturan": "语言", "Adaptif (Motor Halus)": "精细动作", "Kelakuan (Personal Sosial)": "个人社交"
@@ -456,7 +454,7 @@
             ta: {
                 mainTitle: "சாதாரண குழந்தை வளர்ச்சி மதிப்பீடு",
                 mainDesc: "மலேசிய சுகாதார அமைச்சகத்தின் (KKM) அதிகாரப்பூர்வ குழந்தை சுகாதார பதிவு புத்தகத்தின் அடிப்படையில்.",
-                exportBtn: "📥 CSV ஏற்றுமதி",
+                exportBtn: "📤 பதிவைச் சமர்ப்பிக்கவும்",
                 modalTitle: "புதிய பதிவு",
                 labelName: "முழு பெயர் / செல்லப்பெயர்:",
                 labelDOB: "பிறந்த தேதி:",
@@ -468,7 +466,7 @@
                 doctorAdviceTitle: "எப்போது மருத்துவரைப் பார்க்க வேண்டும்?",
                 doctorAdviceDesc: "மேற்கண்ட எச்சரிக்கை அறிகுறிகளை நீங்கள் கவனித்தால், தயவுசெய்து சுகாதார கிளினிக்கில் உள்ள செவிலியரிடம் தெரிவிக்கவும் அல்லது மருத்துவரைப் பார்க்கவும்.",
                 interventionTitle: "பரிந்துரைக்கப்பட்ட தலையீட்டு நடவடிக்கைகள்",
-                notOwnerAlert: "அணுகல் மறுக்கப்பட்டது: பதிவு உரிமையாளர் மட்டுமே தரவை ஏற்றுமதி செய்ய முடியும்.",
+                notOwnerAlert: "அணுகல் மறுக்கப்பட்டது: பதிவு உரிமையாளர் மட்டுமே தரவை சமர்ப்பிக்க முடியும்.",
                 categories: {
                     "Motor Kasar": "மொத்த மோட்டார்", "Penglihatan": "பார்வை", "Pendengaran / Kognitif": "கேட்டல் / அறிவாற்றல்", 
                     "Pertuturan": "பேச்சு", "Adaptif (Motor Halus)": "சிறிய மோட்டார்", "Kelakuan (Personal Sosial)": "தனிப்பட்ட சமூகம்"
@@ -622,7 +620,7 @@
                 currentProfile = JSON.parse(localStorage.getItem('childProfile')) || null;
                 progressData = JSON.parse(localStorage.getItem('localProgress')) || {};
             } catch (e) {
-                console.warn("Storage access restricted. Profile info won't be saved permanently.");
+                console.warn("Storage access restricted.");
                 currentProfile = null;
             }
 
@@ -775,9 +773,7 @@
             
             try {
                 localStorage.setItem('childProfile', JSON.stringify(currentProfile));
-            } catch (e) {
-                console.warn("Could not save to localStorage.");
-            }
+            } catch (e) {}
             
             closeModal('profile-modal');
             renderContent(activeAgeId);
@@ -794,7 +790,7 @@
             renderContent(ageId); 
         }
 
-        // --- CSV EXPORT WITH OWNER VALIDATION ---
+        // --- MENGHANTAR DATA KE GOOGLE SHEET (DENGAN SENARAI TIDAK DICAPAI) ---
         window.exportCSV = function() {
             if (!currentProfile || !currentProfile.name) return;
             
@@ -805,33 +801,76 @@
                 return;
             }
 
-            let csvContent = "data:text/csv;charset=utf-8,";
-            
-            csvContent += `Nama Anak:,${currentProfile.name}\n`;
-            csvContent += `Tarikh Lahir:,${currentProfile.dob}\n\n`;
-            csvContent += `Umur,Kategori,Perkara,Status\n`;
+            // Tukar butang jadi status loading
+            const btnExport = document.getElementById('t-export-btn');
+            const originalText = btnExport.innerText;
+            btnExport.innerText = "⏳ Menghantar...";
+            btnExport.disabled = true;
 
-            for (let i = 0; i < ageOrder.length; i++) {
-                let age = ageOrder[i];
-                let gIndex = 0;
-                devData[age].milestones.forEach(cat => {
-                    cat.items.forEach(item => {
-                        const isDone = (progressData[age] && progressData[age][gIndex]) ? "Dicapai (Yes)" : "Belum (No)";
-                        const textStr = `"${item.ms}"`; 
-                        const labelText = devData[age].label[currentLang] || devData[age].label.ms;
-                        csvContent += `"${labelText}","${cat.cat}",${textStr},${isDone}\n`;
-                        gIndex++;
-                    });
+            const ageData = devData[activeAgeId];
+            let skor = {};
+            let totalItems = 0;
+            let totalChecked = 0;
+            let missedItems = []; // Array untuk simpan kemahiran yang tidak ditanda
+            let gIndex = 0;
+
+            ageData.milestones.forEach(cat => {
+                let catTotal = 0;
+                let catChecked = 0;
+                
+                cat.items.forEach(item => {
+                    const isChecked = (progressData[activeAgeId] && progressData[activeAgeId][gIndex]);
+                    if (isChecked) {
+                        catChecked++;
+                        totalChecked++;
+                    } else {
+                        // Kumpul teks kemahiran yang tidak dicapai (ambil versi Bahasa Melayu)
+                        missedItems.push(item.ms); 
+                    }
+                    gIndex++;
+                    catTotal++;
+                    totalItems++;
                 });
+                skor[cat.cat] = `${catChecked}/${catTotal}`;
+            });
+
+            // Format mesej Keputusan / Amaran untuk Google Sheet
+            let keputusanStr = "";
+            if (totalChecked === totalItems) {
+                keputusanStr = "🌟 Lulus (Semua Dicapai)";
+            } else {
+                keputusanStr = "⚠️ AMARAN (Gagal capai): " + missedItems.join(", ");
             }
 
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `Rekod_Perkembangan_${currentProfile.name}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const payload = {
+                nama: currentProfile.name,
+                dob: currentProfile.dob,
+                umurDinilai: ageData.label.ms, 
+                skorMotor: skor["Motor Kasar"] || "0/0",
+                skorPenglihatan: skor["Penglihatan"] || "0/0",
+                skorPendengaran: skor["Pendengaran / Kognitif"] || "0/0",
+                skorPertuturan: skor["Pertuturan"] || "0/0",
+                skorAdaptif: skor["Adaptif (Motor Halus)"] || "0/0",
+                skorKelakuan: skor["Kelakuan (Personal Sosial)"] || "0/0",
+                keputusan: keputusanStr
+            };
+
+            // Hantar ke Google Apps Script URL
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(() => {
+                alert(currentLang === 'ms' ? "Rekod berjaya dihantar ke sistem!" : "Record successfully submitted!");
+                btnExport.innerText = originalText;
+                btnExport.disabled = false;
+            }).catch(err => {
+                console.error("Error:", err);
+                alert("Ralat sambungan. Sila cuba lagi.");
+                btnExport.innerText = originalText;
+                btnExport.disabled = false;
+            });
         }
 
         // Start initialization immediately when DOM is ready
